@@ -13,18 +13,4 @@ import { ConfirmProvider } from '@/providers/ConfirmProvider';
  * they sit above auth. Toast and confirm sit below it because signing out
  * announces itself through both.
  */
-export default function App() {
-  return (
-    <ThemeProvider>
-      <CurrencyProvider>
-        <AuthProvider>
-          <ToastProvider>
-            <ConfirmProvider>
-              <RouterProvider router={router} />
-            </ConfirmProvider>
-          </ToastProvider>
-        </AuthProvider>
-      </CurrencyProvider>
-    </ThemeProvider>
-  );
-}
+
