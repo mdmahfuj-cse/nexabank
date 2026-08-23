@@ -74,7 +74,80 @@ export default function SignIn() {
       description="Two steps: your password, then a one-time code. Nothing is stored on a server — this build runs entirely in your browser."
       footer={<AuthSwitch to="/sign-up" label="No profile yet?" action="Create one" />}
     >
+      <form onSubmit={onSubmit} noValidate>
+        {failure ? (
+          <InlineAlert className="mb-5">{failure}</InlineAlert>
+        ) : null}
 
+        <Field label="Work email" htmlFor="email" error={errors.email?.message}>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@company.com"
+            leading={<Mail className="size-4" />}
+            invalid={Boolean(errors.email)}
+            {...register('email')}
+          />
+        </Field>
+
+        <Field
+          label="Password"
+          htmlFor="password"
+          error={errors.password?.message}
+          hint="Demo password is nexa1234"
+        >
+          <Input
+            id="password"
+            type={revealed ? 'text' : 'password'}
+            autoComplete="current-password"
+            placeholder="••••••••"
+            leading={<Lock className="size-4" />}
+            invalid={Boolean(errors.password)}
+            trailing={
+              <button
+                type="button"
+                onClick={() => setRevealed((value) => !value)}
+                aria-label={revealed ? 'Hide password' : 'Show password'}
+                className="rounded p-1.5 text-base-content/40 transition-colors hover:text-base-content"
+              >
+                {revealed ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            }
+            {...register('password')}
+          />
+        </Field>
+
+        <div className="-mt-1 mb-5 flex items-center justify-between gap-4">
+          <Toggle
+            checked={remember}
+            onChange={setRemember}
+            label="Remember this email"
+            description="Fills it in next time, on this device only"
+          />
+        </div>
+
+        <Button type="submit" variant="primary" size="lg" block loading={isSubmitting}>
+          Continue
+          {!isSubmitting ? <ArrowRight className="size-4" /> : null}
+        </Button>
+
+        <div className="mt-4 flex items-center justify-between gap-4 text-sm">
+          <Link
+            to="/forgot-password"
+            className="text-base-content/55 transition-colors hover:text-base-content"
+          >
+            Forgot your password?
+          </Link>
+          <button
+            type="button"
+            onClick={fillDemo}
+            className="font-medium text-primary transition-opacity hover:opacity-75"
+          >
+            Use demo credentials
+          </button>
+        </div>
+      </form>
     </AuthLayout>
   );
 }
