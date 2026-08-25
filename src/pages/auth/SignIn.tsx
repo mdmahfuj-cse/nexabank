@@ -79,18 +79,19 @@ export default function SignIn() {
           <InlineAlert className="mb-5">{failure}</InlineAlert>
         ) : null}
 
-        <Field label="Work email" htmlFor="email" error={errors.email?.message}>
+        <Field label="Work email" htmlFor="email" error={errors.email?.message} hint="ada@nexabank.io">
           <Input
             id="email"
             type="email"
             autoComplete="email"
             placeholder="you@company.com"
+            
             leading={<Mail className="size-4" />}
             invalid={Boolean(errors.email)}
             {...register('email')}
           />
         </Field>
-
+<br />
         <Field
           label="Password"
           htmlFor="password"
