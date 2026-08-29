@@ -1,8 +1,8 @@
-import { useCurrency } from '@/providers/CurrencyProvider';
-import { useCountUp } from '@/hooks/useCountUp';
-import { cn } from '@/lib/cn';
-import type { FormatMoneyOptions } from '@/lib/money';
-import type { CurrencyCode } from '@/types/domain';
+import { useCurrency } from "@/providers/CurrencyProvider";
+import { useCountUp } from "@/hooks/useCountUp";
+import { cn } from "@/lib/cn";
+import type { FormatMoneyOptions } from "@/lib/money";
+import type { CurrencyCode } from "@/types/domain";
 
 /**
  * An amount that settles into place, like a counter coming to rest.
@@ -13,7 +13,7 @@ import type { CurrencyCode } from '@/types/domain';
  */
 export function AmountRoll({
   minor,
-  from = 'USD',
+  from = "BDT",
   options,
   animate = true,
   duration,
@@ -31,7 +31,7 @@ export function AmountRoll({
   const shown = animate ? Math.round(rolled) : minor;
 
   return (
-    <span className={cn('amount', className)}>
+    <span className={cn("amount", className)}>
       {money(shown, from, options)}
     </span>
   );
