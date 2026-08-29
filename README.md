@@ -1,5 +1,8 @@
 # NexaBank
 
+[![Live Demo](https://img.shields.io/badge/Live-Demo-0A7EA4?style=for-the-badge&logo=netlify&logoColor=white)](https://nexabaank.netlify.app/)
+[![Website](https://img.shields.io/badge/Website-nexabaank.netlify.app-1E90FF?style=flat-square)](https://nexabaank.netlify.app/)
+
 An enterprise-style digital banking portal, built as a frontend. It is the kind
 of interface a commercial bank puts in front of a finance team rather than a
 balance-and-transfer toy: five working areas, a mock API that behaves like a
@@ -36,6 +39,43 @@ npm run preview     # serve the build
 ```
 
 Node 20 or newer.
+
+---
+
+## Code Architecture
+
+```mermaid
+flowchart LR
+    A[Pages / Auth Screens] --> B[Route Guards + Router]
+    B --> C[Providers]
+    A --> D[Reusable Components]
+    D --> E[Hooks]
+    E --> F[Lib Helpers]
+    C --> G[Mock API + Seed Data]
+    D --> H[Charts + Forms + UI]
+    G --> I[Banking Domain Logic]
+    I --> J[Display Currency + Data State]
+```
+
+The app is structured around a predictable frontend architecture:
+
+- `src/pages/` contains the route-level screens for dashboard, cards, transfers,
+  analytics, transactions, and auth flows.
+- `src/components/` holds the reusable UI building blocks, including charts,
+  layout, transfers, forms, and brand graphics.
+- `src/providers/` provides shared app state such as auth, theme, currency,
+  confirmation flow, and toast messaging.
+- `src/hooks/` centralizes async, storage, debounce, media-query, and UI helper
+  logic.
+- `src/lib/` stores financial/domain utilities like money formatting, dates,
+  CSV export, taxonomy, and masking.
+- `src/mocks/` creates the deterministic seeded dataset and fake network layer
+  that simulates API loading, filters, pagination, and error states.
+- `src/routes/` manages navigation guards and route-level error handling.
+
+This separation keeps business logic, presentation, and data simulation cleanly
+separated while still allowing the prototype to behave like a realistic banking
+product.
 
 ---
 
