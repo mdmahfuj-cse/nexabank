@@ -419,7 +419,320 @@ export default function Cards() {
       {/* The wallet */}
 
 
+      {card ? (
+        <>
+          {/* Detail and controls */}
+          <div className="mb-4 grid gap-4 xl:grid-cols-3">
+            <Panel className="xl:col-span-2">
+              <PanelHeader
+                eyebrow={card.variant === 'virtual' ? 'Virtual card' : 'Physical card'}
+                title={card.label}
+                actions={
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      icon={
+                        revealed ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />
+                      }
+                      onClick={() => setRevealed((value) => !value)}
+                    >
+                      {revealed ? 'Hide' : 'Reveal'}
+                    </Button>
+                    <CopyButton value={card.pan} label="Copy number" className="ml-1" />
+                  </>
+                }
+              />
+              <PanelBody>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <dl>
+                    <DetailRow label="Status">
+                      {card.frozen ? (
+                        <Badge tone="warning">Frozen</Badge>
+                      ) : (
+                        <Badge tone="success">Active</Badge>
+                      )}
+                    </DetailRow>
+                    <DetailRow label="Card number">
+                      <span className="amount font-mono text-xs tracking-wider">
+                        {revealed ? card.pan : maskPan(card.pan)}
+                      </span>
+                    </DetailRow>
+                    <DetailRow label="Expires">
+                      <span className="amount font-mono text-xs">{card.expiry}</span>
+                    </DetailRow>
+                    <DetailRow label="Security code">
+                      <span className="amount font-mono text-xs">
+                        {revealed ? card.cvv : '•••'}
+                      </span>
+                    </DetailRow>
+                    <DetailRow label="Cardholder">{card.holder}</DetailRow>
+                    <DetailRow label="Funding account">
+                      {fundingAccount
+                        ? `${fundingAccount.name} · ${maskAccount(fundingAccount.number)}`
+                        : '—'}
+                    </DetailRow>
+                    <DetailRow label="Currency">{card.currency}</DetailRow>
+                    <DetailRow label="Issued">
+                      <span className="amount font-mono text-xs">{fmtDate(card.createdAt)}</span>
+                    </DetailRow>
+                  </dl>
 
+                  <div className="flex flex-col gap-5">
+                    <Progress
+                      value={card.spentThisMonthMinor}
+                      max={card.monthlyLimitMinor}
+                      label="Spent this month"
+                      caption={`${money(card.spentThisMonthMinor, card.currency)} of ${money(
+                        card.monthlyLimitMinor,
+                        card.currency,
+                      )}`}
+                    />
+
+                    <dl>
+                      <DetailRow label="Monthly limit">
+                        <span className="amount font-mono text-xs">
+                          {money(card.monthlyLimitMinor, card.currency)}
+                        </span>
+                      </DetailRow>
+                      <DetailRow label="Per transaction">
+                        <span className="amount font-mono text-xs">
+                          {money(card.perTransactionLimitMinor, card.currency)}
+                        </span>
+                      </DetailRow>
+                      <DetailRow label="Remaining">
+                        <span className="amount font-mono text-xs">
+                          {money(
+                            Math.max(card.monthlyLimitMinor - card.spentThisMonthMinor, 0),
+                            card.currency,
+                          )}
+                        </span>
+                      </DetailRow>
+                    </dl>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="self-start"
+                      icon={<SlidersHorizontal className="size-3.5" />}
+                      onClick={openLimits}
+                    >
+                      Adjust limits
+                    </Button>
+
+                    {revealed ? (
+                      <p className="text-xs leading-relaxed text-base-content/45">
+                        Full details hide themselves again after twenty seconds.
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              </PanelBody>
+            </Panel>
+
+            <Panel>
+              <PanelHeader
+                eyebrow="Controls"
+                title="What this card can do"
+                description="Changes apply the moment you make them."
+              />
+              <PanelBody>
+                <div className="space-y-1">
+                  <Toggle
+                    checked={card.contactless}
+                    onChange={(next) => setControls({ contactless: next })}
+                    label="Contactless"
+                    description="Tap to pay at terminals."
+                    disabled={card.frozen || card.variant === 'virtual'}
+                  />
+                  <Toggle
+                    checked={card.onlinePayments}
+                    onChange={(next) => setControls({ onlinePayments: next })}
+                    label="Online payments"
+                    description="Card-not-present purchases and subscriptions."
+                    disabled={card.frozen}
+                  />
+                  <Toggle
+                    checked={card.atmWithdrawals}
+                    onChange={(next) => setControls({ atmWithdrawals: next })}
+                    label="ATM withdrawals"
+                    description="Cash machines, at home and abroad."
+                    disabled={card.frozen || card.variant === 'virtual'}
+                  />
+                </div>
+
+                {card.variant === 'virtual' ? (
+                  <p className="mt-3 text-xs leading-relaxed text-base-content/45">
+                    Virtual cards exist online only, so contactless and ATM access stay off.
+                  </p>
+                ) : null}
+
+                <div
+                  className={cn(
+                    'mt-5 flex items-start gap-3 rounded-[var(--radius-box)] border p-3.5',
+                    card.frozen
+                      ? 'border-warning/30 bg-warning/10'
+                      : 'border-base-300 bg-base-200/50',
+                  )}
+                >
+                  <Snowflake
+                    className={cn(
+                      'mt-0.5 size-4 shrink-0',
+                      card.frozen ? 'text-warning' : 'text-base-content/40',
+                    )}
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">
+                      {card.frozen ? 'This card is frozen' : 'Freeze this card'}
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-base-content/60">
+                      {card.frozen
+                        ? 'Payments are being declined. Nothing else about the card has changed — the number and limits are intact.'
+                        : 'Stops every payment at once, without cancelling the card. Reversible whenever you like.'}
+                    </p>
+                    <Button
+                      className="mt-3"
+                      size="sm"
+                      variant={card.frozen ? 'primary' : 'outline'}
+                      loading={busy === 'freeze'}
+                      icon={
+                        card.frozen ? (
+                          <Unlock className="size-3.5" />
+                        ) : (
+                          <Snowflake className="size-3.5" />
+                        )
+                      }
+                      onClick={toggleFreeze}
+                    >
+                      {card.frozen ? 'Unfreeze card' : 'Freeze card'}
+                    </Button>
+                  </div>
+                </div>
+              </PanelBody>
+            </Panel>
+          </div>
+
+          {/* Spend and payments */}
+          <div className="grid gap-4 xl:grid-cols-3">
+            <Panel>
+              <PanelHeader
+                eyebrow="Spend"
+                title="Last six months"
+                description="Settled and pending card payments, month by month."
+              />
+              <PanelBody>
+                <SpendBars
+                  data={spend}
+                  loading={history.initialLoading}
+                  error={history.error}
+                  onRetry={history.refetch}
+                  height={224}
+                />
+              </PanelBody>
+            </Panel>
+
+            <Panel className="xl:col-span-2">
+              <PanelHeader
+                eyebrow="Activity"
+                title="Card payments"
+                actions={
+                  ledger.data ? (
+                    <p className="amount font-mono text-sm text-base-content/45">
+                      {ledger.data.total.toLocaleString('en-US')}
+                    </p>
+                  ) : null
+                }
+              />
+              <PanelBody flush>
+                <div
+                  className={cn(
+                    'transition-opacity duration-200',
+                    ledger.loading && !ledger.initialLoading && 'opacity-55',
+                  )}
+                >
+                  <TransactionLedger
+                    rows={ledger.data?.rows ?? []}
+                    loading={ledger.initialLoading}
+                    error={ledger.error}
+                    onRetry={ledger.refetch}
+                    onSelect={setSelectedTransaction}
+                    skeletonRows={LEDGER_PAGE_SIZE}
+                    empty={
+                      <EmptyState
+                        title="Nothing on this card yet"
+                        description="Card payments appear here as soon as the first one is authorised."
+                        icon={<CreditCard className="size-5" />}
+                      />
+                    }
+                  />
+                </div>
+              </PanelBody>
+
+              {ledger.data && ledger.data.total > 0 ? (
+                <Pagination
+                  page={ledger.data.page}
+                  pageCount={ledger.data.pageCount}
+                  total={ledger.data.total}
+                  pageSize={ledger.data.pageSize}
+                  onPage={setLedgerPage}
+                  noun="card payments"
+                />
+              ) : null}
+            </Panel>
+          </div>
+
+          {/* Limits */}
+          <Dialog
+            open={limitsOpen}
+            onClose={() => setLimitsOpen(false)}
+            title="Spending limits"
+            description={`Both limits are set in ${CURRENCIES[card.currency].name.toLowerCase()}, the card's own currency.`}
+            footer={
+              <>
+                <Button variant="ghost" onClick={() => setLimitsOpen(false)}>
+                  Cancel
+                </Button>
+                <Button variant="primary" loading={busy === 'limits'} onClick={saveLimits}>
+                  Save limits
+                </Button>
+              </>
+            }
+          >
+            <div className="space-y-1">
+              <Field
+                label="Monthly limit"
+                htmlFor="limit-monthly"
+                hint={`Spent so far this month: ${formatMoney(
+                  card.spentThisMonthMinor,
+                  card.currency,
+                )} ${card.currency}`}
+              >
+                <AmountInput
+                  id="limit-monthly"
+                  symbol={CURRENCIES[card.currency].symbol}
+                  value={monthlyInput}
+                  onChange={(event) => setMonthlyInput(event.target.value)}
+                />
+              </Field>
+
+              <Field
+                label="Per transaction"
+                htmlFor="limit-per"
+                hint="The largest single payment this card will authorise."
+              >
+                <AmountInput
+                  id="limit-per"
+                  symbol={CURRENCIES[card.currency].symbol}
+                  value={perInput}
+                  onChange={(event) => setPerInput(event.target.value)}
+                />
+              </Field>
+
+              {limitError ? <InlineAlert>{limitError}</InlineAlert> : null}
+            </div>
+          </Dialog>
+        </>
+      ) : null}
 
       {/* Issue */}
       <Dialog
